@@ -4,16 +4,15 @@ https://github.com/threepointone/glamor/blob/667b480d31b3721a905021b26e1290ce92c
 */
 
 const isProd = process.env && process.env.NODE_ENV === 'production'
+const isTest = process.env && process.env.NODE_ENV === 'test'
 const isString = o => Object.prototype.toString.call(o) === '[object String]'
 
 export default class StyleSheet {
-  constructor(
-    {
-      name = 'stylesheet',
-      optimizeForSpeed = isProd,
-      isBrowser = typeof window !== 'undefined'
-    } = {}
-  ) {
+  constructor({
+    name = 'stylesheet',
+    optimizeForSpeed = isProd,
+    isBrowser = typeof window !== 'undefined'
+  } = {}) {
     invariant(isString(name), '`name` must be a string')
     this._name = name
     this._deletedRulePlaceholder = `#${name}-deleted-rule____{}`
@@ -102,6 +101,9 @@ export default class StyleSheet {
   }
 
   insertRule(rule, index) {
+    if (!isString(rule) && isTest) {
+      return this._rulesCount
+    }
     invariant(isString(rule), '`insertRule` accepts only strings')
 
     if (!this._isBrowser) {
